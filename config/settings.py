@@ -31,6 +31,8 @@ ALLOWED_HOSTS = [ '*' ]
 # Application definition
 
 LOCAL_APPS = [
+    'users',
+    'companies',
 ]
 
 THIRD_PARTY_APPS = [

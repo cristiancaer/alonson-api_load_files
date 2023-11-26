@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from django.http import JsonResponse
 from rest_framework import status
 
@@ -9,4 +9,5 @@ def test():
 
 urlpatterns = [
     path('test/', test(), name='test'),
+    path('users/', include('users.urls')),
 ]
