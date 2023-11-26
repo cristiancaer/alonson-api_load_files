@@ -11,7 +11,7 @@ def format_db_constrain(detail):
 
 
 def format_serializer_errors(serializer_errors):
-    if 'non_field_errors' in serializer_errors:
+    if 'non_field_errors' in str(serializer_errors):
         return format_db_constrain(serializer_errors.get('non_field_errors')[0])
     if 'ErrorDetail' in str(serializer_errors):
         return format_field_constrain_from_serializer_error(serializer_errors)

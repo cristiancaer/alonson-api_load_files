@@ -8,6 +8,7 @@ def test():
 
 
 urlpatterns = [
-    path('test/', test(), name='test'),
+    path('test', test(), name='test'),
     path('users/', include('users.urls')),
+    path('companies/', include('companies.urls')),
 ]

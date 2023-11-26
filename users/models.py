@@ -20,6 +20,8 @@ class User(models.Model):
     is_active = models.BooleanField()
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     area = models.ForeignKey(Area, on_delete=models.DO_NOTHING)
+    is_admin = models.BooleanField(default=False)
+    is_super_admin = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -37,6 +39,8 @@ class User(models.Model):
         return self.email
 
     def save(self, *args, **kwargs):
+        if self.is_super_admin:
+            self.is_admin = True
         super().save(*args, **kwargs)
         if self._password is not None:
             password_validation.password_changed(self._password, self)
