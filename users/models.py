@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.auth import password_validation
 from django.contrib.auth.hashers import (
     check_password,
     is_password_usable,
@@ -41,10 +40,9 @@ class User(models.Model):
     def save(self, *args, **kwargs):
         if self.is_super_admin:
             self.is_admin = True
+        if self.password:
+            self.set_password(self.password)
         super().save(*args, **kwargs)
-        if self._password is not None:
-            password_validation.password_changed(self._password, self)
-            self._password = None
 
     @property
     def is_authenticated(self):

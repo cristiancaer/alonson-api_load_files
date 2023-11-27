@@ -10,6 +10,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'
+        extra_kwargs = {'password': {'write_only': True}}
 
     def to_internal_value(self, data):
         internal_value = super().to_internal_value(data)
