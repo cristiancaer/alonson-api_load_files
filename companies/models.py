@@ -13,7 +13,7 @@ class Company(models.Model):
         db_table = 'companies'
 
     def __str__(self):
-        return f'Company({self.name})'
+        return self.name
 
 
 class Area(models.Model):
@@ -25,4 +25,4 @@ class Area(models.Model):
         db_table = 'areas'
 
     def __str__(self):
-        return f'Area({self.name})'
+        return self.name

@@ -1,5 +1,10 @@
 import re
 from django.core.exceptions import BadRequest
+from django.core.validators import MaxValueValidator, MinValueValidator
+
+
+def setRangeValidators(min_value, max_value):
+    return (MinValueValidator(min_value), MaxValueValidator(max_value))
 
 
 def validate_password(password, min_characters=8, raise_error=False):

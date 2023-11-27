@@ -33,6 +33,7 @@ ALLOWED_HOSTS = [ '*' ]
 LOCAL_APPS = [
     'users',
     'companies',
+    'files'
 ]
 
 THIRD_PARTY_APPS = [
@@ -93,6 +94,11 @@ AUTHENTICATION_BACKENDS = [
     'users.backends.UserBackend',
 ]
 AUTH_USER_MODEL = 'users.User'
+STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static').replace('\\', '/')
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'static', 'media').replace('\\', '/')
+MEDIA_URL = '/media/'
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
