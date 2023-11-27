@@ -10,15 +10,15 @@ from rest_framework.permissions import IsAuthenticated
 
 
 class BasicCrudApiView(APIView):
-    class_model = Model
-    class_serializer = ModelSerializer
+    model = Model
+    serializer = ModelSerializer
     use_user = False
     id_field_name = 'id'
     use_user_as = 'user'
 
     def get(self, request, **kwargs):
         try:
-            instances = self.class_model.objects.all()
+            instances = self.model.objects.all()
             if self.use_user:
                 instances = instances.filter(**{self.use_user_as: request.user.id})
 
@@ -29,9 +29,9 @@ class BasicCrudApiView(APIView):
             if not instances:
                 return Response(NO_RECORDS, status=status.HTTP_204_NO_CONTENT)
             if id_value:
-                serializer = self.class_serializer(instances.first())
+                serializer = self.serializer(instances.first())
             else:
-                serializer = self.class_serializer(instances, many=True)
+                serializer = self.serializer(instances, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except BadRequest as e:
             return Response(e.args[0], status=status.HTTP_400_BAD_REQUEST)
@@ -46,7 +46,7 @@ class BasicCrudApiView(APIView):
                     data = {**data, self.use_user_as: request.user.id}
                 else:
                     data = {**data.dict(), self.use_user_as: request.user.id}
-            serializer = self.class_serializer(data=data)
+            serializer = self.serializer(data=data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
@@ -65,10 +65,10 @@ class BasicCrudApiView(APIView):
                 else:
                     data = {**data.dict(), self.use_user_as: request.user.id}
             id = get_field_from_url_args(kwargs, self.id_field_name)
-            instance = self.class_model.objects.filter(id=id).first()
+            instance = self.model.objects.filter(id=id).first()
             if not instance:
                 return Response(NO_RECORDS, status=status.HTTP_400_BAD_REQUEST)
-            serializer = self.class_serializer(instance, data=data, partial=True)
+            serializer = self.serializer(instance, data=data, partial=True)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
@@ -82,9 +82,9 @@ class BasicCrudApiView(APIView):
         try:
             id = get_field_from_url_args(kwargs, self.id_field_name)
             if self.use_user:
-                instance = self.class_model.objects.filter(id=id, **{self.use_user_as: request.user.id}).first()
+                instance = self.model.objects.filter(id=id, **{self.use_user_as: request.user.id}).first()
             else:
-                instance = self.class_model.objects.filter(id=id).first()
+                instance = self.model.objects.filter(id=id).first()
             if not instance:
                 return Response(NO_RECORDS, status=status.HTTP_400_BAD_REQUEST)
             instance.delete()

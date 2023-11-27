@@ -6,13 +6,13 @@ from rest_framework.permissions import AllowAny
 
 class CompaniesApiView(BasicCrudApiView):
     permission_classes = (AllowAny,)
-    class_model = Company
-    class_serializer = CompanySerializer
+    model = Company
+    serializer = CompanySerializer
     id_field_name = 'company_id'
 
 
 class AreasApiView(BasicCrudApiView):
     permission_classes = (AllowAny,)
-    class_model = Area
-    class_serializer = AreaSerializer
+    model = Area
+    serializer = AreaSerializer
     id_field_name = 'area_id'
