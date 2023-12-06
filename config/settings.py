@@ -198,3 +198,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+STORAGE_ACCOUNT_NAME = env('STORAGE_ACCOUNT_NAME')
+CONECTION_STRING = env('CONECTION_STRING')
+CONTAINER_NAME = env('CONTAINER_NAME')
