@@ -2,9 +2,14 @@ from django.core.files.storage import Storage
 from django.conf import settings
 from azure.storage.blob import BlobServiceClient, BlobClient, BlobSasPermissions, generate_blob_sas
 from datetime import datetime, timedelta, timezone
+from django.utils.deconstruct import deconstructible
 
 
+@deconstructible  # to avid error:  Cannot serialize: <files.storages.AzureStorage object at makemigrations
 class AzureStorage(Storage):
+    def __str__(self) -> str:
+        return 'AzureStorage'
+
     def get_service_sas_blob_token(self, blob_client: BlobClient):
         # Create a SAS token
         start_time = datetime.now(timezone.utc)
