@@ -36,7 +36,10 @@ class AzureStorage(Storage):
     def _save(self, name: str, memory_file_object):
         blob_client = self.service_client.get_blob_client(container=self.CONTAINER_NAME, blob=name)
         file = memory_file_object.file
-        blob_client.upload_blob(file, metadata={'uploaded_filename': memory_file_object.name})
+        if blob_client.exists():
+            blob_client.upload_blob(file, overwrite=True, metadata={'uploaded_filename': memory_file_object.name})
+        else:
+            blob_client.upload_blob(file, metadata={'uploaded_filename': memory_file_object.name})
         return name
 
     def delete(self, name):
@@ -44,8 +47,8 @@ class AzureStorage(Storage):
         blob_client.delete_blob()
 
     def exists(self, name):
-        blob_client = self.service_client.get_blob_client(container=self.CONTAINER_NAME, blob=name)
-        return blob_client.exists()
+        # blob_client = self.service_client.get_blob_client(container=self.CONTAINER_NAME, blob=name)
+        return False  # do not check if file exists, overwrite it by default
 
     def url(self, name):
         blob_client = self.service_client.get_blob_client(container=self.CONTAINER_NAME, blob=name)
