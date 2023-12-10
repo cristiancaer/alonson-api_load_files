@@ -14,13 +14,13 @@ class BasicCrudApiView(APIView):
     serializer = ModelSerializer
     use_user = False
     id_field_name = 'id'
-    use_user_as = 'user'
+    user_field_name = 'user'
 
     def get(self, request, **kwargs):
         try:
             instances = self.model.objects.all()
             if self.use_user:
-                instances = instances.filter(**{self.use_user_as: request.user.id})
+                instances = instances.filter(**{self.user_field_name: request.user.id})
 
             id_value = get_field_from_url_args(kwargs, self.id_field_name, False)
             if id_value:
@@ -43,9 +43,9 @@ class BasicCrudApiView(APIView):
             data = request.data
             if self.use_user:
                 if isinstance(data, dict):
-                    data = {**data, self.use_user_as: request.user.id}
+                    data = {**data, self.user_field_name: request.user.id}
                 else:
-                    data = {**data.dict(), self.use_user_as: request.user.id}
+                    data = {**data.dict(), self.user_field_name: request.user.id}
             serializer = self.serializer(data=data)
             if serializer.is_valid():
                 serializer.save()
@@ -61,9 +61,9 @@ class BasicCrudApiView(APIView):
             data = request.data
             if self.use_user:
                 if isinstance(data, dict):
-                    data = {**data, self.use_user_as: request.user.id}
+                    data = {**data, self.user_field_name: request.user.id}
                 else:
-                    data = {**data.dict(), self.use_user_as: request.user.id}
+                    data = {**data.dict(), self.user_field_name: request.user.id}
             id = get_field_from_url_args(kwargs, self.id_field_name)
             instance = self.model.objects.filter(id=id).first()
             if not instance:
@@ -82,7 +82,7 @@ class BasicCrudApiView(APIView):
         try:
             id = get_field_from_url_args(kwargs, self.id_field_name)
             if self.use_user:
-                instance = self.model.objects.filter(id=id, **{self.use_user_as: request.user.id}).first()
+                instance = self.model.objects.filter(id=id, **{self.user_field_name: request.user.id}).first()
             else:
                 instance = self.model.objects.filter(id=id).first()
             if not instance:
@@ -98,6 +98,7 @@ class RollAccessApiView(APIView):
     model = Model
     serializer = ModelSerializer
     id_field_name = 'id'
+    user_field_name = None
 
     def get_queryset(self, request):
         user = request.user
@@ -124,10 +125,13 @@ class RollAccessApiView(APIView):
         data = request.data
         if request.user.is_super_admin:
             return data
+        if self.user_field_name:
+            data = {**data, self.user_field_name: request.user.id}
         if request.user.is_admin:
             {**data, 'company': request.user.company.id}
             return data
-        return {**data, 'company': request.user.company.id, 'area': request.user.area.id}
+        data = {**data, 'company': request.user.company.id, 'area': request.user.area.id}
+        return data
 
     def post(self, request):
         try:
