@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 
 class AzureStorage(Storage):
     def get_service_sas_blob_token(self, blob_client: BlobClient):
-        # Create a SAS token that's valid for one day, as an example
+        # Create a SAS token
         start_time = datetime.now(timezone.utc)
         expiry_time = start_time + timedelta(minutes=1)
         sas_token = 'error_sas_token'
@@ -33,10 +33,10 @@ class AzureStorage(Storage):
         blob_client = self.service_client.get_blob_client(container=self.CONTAINER_NAME, blob=name)
         return open(blob_client, mode)
 
-    def _save(self, name, memory_file_object):
+    def _save(self, name: str, memory_file_object):
         blob_client = self.service_client.get_blob_client(container=self.CONTAINER_NAME, blob=name)
         file = memory_file_object.file
-        blob_client.upload_blob(file)
+        blob_client.upload_blob(file, metadata={'uploaded_filename': memory_file_object.name})
         return name
 
     def delete(self, name):

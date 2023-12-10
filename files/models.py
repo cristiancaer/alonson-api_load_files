@@ -9,14 +9,15 @@ from utils.files import PLAIN_EXTENSIONS, EXCEL_EXTENSIONS
 
 class File(models.Model):
     def get_company_directory_path(instance, filename):
-        # file will be uploaded to azure_container/<company>/<area>/<filename>
-        file_extension = Path(filename).suffix
+        # file will be uploaded to azure_container/<company_code>/<area>/<filename>
+        file_extension = Path(filename).suffix.strip('.')
         allowed_extensions = PLAIN_EXTENSIONS + EXCEL_EXTENSIONS
         if file_extension not in allowed_extensions:
             raise Exception(f"Extension {file_extension} not allowed. Allowed extensions are {allowed_extensions}")
-        path_name = f"{instance.company.code}/{instance.area.name}/movimiento/{instance.year}_{instance.month:02}{file_extension}"
+        path_name = f"{instance.company.code}/{instance.area.name}/movimiento/{instance.year}_{instance.month:02}.{file_extension}"
         return path_name
 
+    uploaded_filename = models.CharField(max_length=255)
     file = models.FileField(storage=AzureStorage(), upload_to=get_company_directory_path)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='company_files')
     area = models.ForeignKey(Area, on_delete=models.CASCADE, related_name= 'area_files')
