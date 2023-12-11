@@ -33,7 +33,7 @@ class File(models.Model):
         ordering = ('-year', '-month')
 
 
-class MaterFileTypes(models.Model):
+class MasterFileType(models.Model):
     name = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -43,7 +43,7 @@ class MaterFileTypes(models.Model):
         ordering = ('name',)
 
 
-class MasterFiles(models.Model):
+class MasterFile(models.Model):
     def get_company_directory_path(instance, filename):
         # file will be uploaded to azure_container/<company_code>/<area>/<filename>
         file_extension = Path(filename).suffix.strip('.')
@@ -53,7 +53,7 @@ class MasterFiles(models.Model):
         path_name = f"{instance.company.code}/{instance.area.name}/maestros/{instance.type.name}.{file_extension}"
         return path_name
 
-    type = models.ForeignKey(MaterFileTypes, on_delete=models.CASCADE, related_name='master_files')
+    type = models.ForeignKey(MasterFileType, on_delete=models.CASCADE, related_name='master_files')
     uploaded_filename = models.CharField(max_length=255)
     file = models.FileField(storage=AzureStorage(), upload_to=get_company_directory_path)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='company_master_files')

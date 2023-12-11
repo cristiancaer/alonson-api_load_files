@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('uploaded_filename', models.CharField(max_length=255)),
-                ('file', models.FileField(storage=files.storages.AzureStorage(), upload_to=files.models.MasterFiles.get_company_directory_path)),
+                ('file', models.FileField(storage=files.storages.AzureStorage(), upload_to=files.models.MasterFile.get_company_directory_path)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('area', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='area_master_files', to='companies.area')),
