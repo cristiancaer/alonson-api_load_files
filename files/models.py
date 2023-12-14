@@ -7,7 +7,7 @@ from .storages import AzureStorage
 from utils.files import PLAIN_EXTENSIONS, EXCEL_EXTENSIONS
 
 
-class File(models.Model):
+class TransactionFile(models.Model):
     def get_company_directory_path(instance, filename):
         # file will be uploaded to azure_container/<company_code>/<area>/<movientos>/<filename>
         file_extension = Path(filename).suffix.strip('.')
@@ -29,7 +29,7 @@ class File(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = 'files'
+        db_table = 'transaction_files'
         unique_together = (('company', 'area', 'year', 'month'),)
         ordering = ('-year', '-month')
 
@@ -70,7 +70,7 @@ class MasterFile(models.Model):
 
 
 class Transaction(models.Model):
-    file = models.ForeignKey(File, on_delete=models.DO_NOTHING, related_name='transactions')
+    file = models.ForeignKey(TransactionFile, on_delete=models.DO_NOTHING, related_name='transactions')
     account_level = models.CharField(max_length=20, null=True)  # nivel_cuenta
     is_transactional = models.BooleanField()  # transaccional
     account_number = models.CharField(max_length=20)

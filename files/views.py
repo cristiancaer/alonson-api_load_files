@@ -1,4 +1,4 @@
-from .models import File, MasterFileType, MasterFile
+from .models import TransactionFile, MasterFileType, MasterFile
 from .serializers import FileSerializer, MasterFileTypeSerializer, MasterFileSerializer
 from utils.views import RollAccessApiView, BasicCrudApiView
 from rest_framework.response import Response
@@ -10,7 +10,7 @@ from users.permissions import IsSuperAdminOrReadOnly
 
 
 class FilesApiView(RollAccessApiView):
-    model = File
+    model = TransactionFile
     serializer = FileSerializer
     id_field_name = 'file_id'
     user_field_name = 'loaded_by'

@@ -1,10 +1,10 @@
 from rest_framework import serializers
-from .models import File, MasterFile, MasterFileType
+from .models import TransactionFile, MasterFile, MasterFileType
 
 
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
-        model = File
+        model = TransactionFile
         fields = '__all__'
 
     def to_internal_value(self, data):

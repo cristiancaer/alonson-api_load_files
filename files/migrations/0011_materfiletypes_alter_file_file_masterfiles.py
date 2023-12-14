@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='file',
             name='file',
-            field=models.FileField(storage=files.storages.AzureStorage(), upload_to=files.models.File.get_company_directory_path),
+            field=models.FileField(storage=files.storages.AzureStorage(), upload_to=files.models.TransactionFile.get_company_directory_path),
         ),
         migrations.CreateModel(
             name='MasterFiles',

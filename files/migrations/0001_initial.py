@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
             name='File',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('file', models.FileField(upload_to=files.models.File.get_company_directory_path)),
+                ('file', models.FileField(upload_to=files.models.TransactionFile.get_company_directory_path)),
                 ('loaded_by', models.IntegerField()),
                 ('date', models.DateField(auto_now_add=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
