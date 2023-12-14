@@ -7,6 +7,10 @@ from .storages import AzureStorage
 from utils.files import PLAIN_EXTENSIONS, EXCEL_EXTENSIONS
 
 
+def get_base_area_path(instance):
+    return f"{instance.company.name}_{instance.company.code}/{instance.area.name}"
+
+
 class TransactionFile(models.Model):
     def get_company_directory_path(instance, filename):
         # file will be uploaded to azure_container/<company_code>/<area>/<movientos>/<filename>
@@ -14,7 +18,7 @@ class TransactionFile(models.Model):
         allowed_extensions = PLAIN_EXTENSIONS + EXCEL_EXTENSIONS
         if file_extension not in allowed_extensions:
             raise Exception(f"Extension {file_extension} not allowed. Allowed extensions are {allowed_extensions}")
-        path_name = f"{instance.company.name}_{instance.company.code}/{instance.area.name}/movimientos/{instance.year}_{instance.month:02}.{file_extension}"
+        path_name = f"{get_base_area_path(instance)}/movimientos/{instance.year}_{instance.month:02}.{file_extension}"
         return path_name
 
     uploaded_filename = models.CharField(max_length=255)
@@ -51,7 +55,7 @@ class MasterFile(models.Model):
         allowed_extensions = PLAIN_EXTENSIONS + EXCEL_EXTENSIONS
         if file_extension not in allowed_extensions:
             raise Exception(f"Extension {file_extension} not allowed. Allowed extensions are {allowed_extensions}")
-        path_name = f"{instance.company.name}_{instance.company.code}/{instance.area.name}/maestros/{instance.type.name}.{file_extension}"
+        path_name = f"{get_base_area_path(instance)}/maestros/{instance.type.name}.{file_extension}"
         return path_name
 
     type = models.ForeignKey(MasterFileType, on_delete=models.CASCADE, related_name='master_files')
