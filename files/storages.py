@@ -12,8 +12,8 @@ class AzureStorage(Storage):
 
     def get_service_sas_blob_token(self, blob_client: BlobClient):
         # Create a SAS token
-        start_time = datetime.now(timezone.utc)
-        expiry_time = start_time + timedelta(minutes=1)
+        start_time = datetime.now(timezone.utc) - timedelta(minutes=1)
+        expiry_time = start_time + timedelta(minutes=30)
         sas_token = 'error_sas_token'
         try:
             sas_token = generate_blob_sas(
