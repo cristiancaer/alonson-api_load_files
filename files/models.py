@@ -14,7 +14,7 @@ class File(models.Model):
         allowed_extensions = PLAIN_EXTENSIONS + EXCEL_EXTENSIONS
         if file_extension not in allowed_extensions:
             raise Exception(f"Extension {file_extension} not allowed. Allowed extensions are {allowed_extensions}")
-        path_name = f"{instance.company.code}/{instance.area.name}/movimientos/{instance.year}_{instance.month:02}.{file_extension}"
+        path_name = f"{instance.company.name}_{instance.company.code}/{instance.area.name}/movimientos/{instance.year}_{instance.month:02}.{file_extension}"
         return path_name
 
     uploaded_filename = models.CharField(max_length=255)
@@ -24,6 +24,7 @@ class File(models.Model):
     loaded_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_files')
     year = models.IntegerField(validators=setRangeValidators(1900, 2100))
     month = models.IntegerField(validators=setRangeValidators(1, 12))
+    last_version = models.SmallIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -50,7 +51,7 @@ class MasterFile(models.Model):
         allowed_extensions = PLAIN_EXTENSIONS + EXCEL_EXTENSIONS
         if file_extension not in allowed_extensions:
             raise Exception(f"Extension {file_extension} not allowed. Allowed extensions are {allowed_extensions}")
-        path_name = f"{instance.company.code}/{instance.area.name}/maestros/{instance.type.name}.{file_extension}"
+        path_name = f"{instance.company.name}_{instance.company.code}/{instance.area.name}/maestros/{instance.type.name}.{file_extension}"
         return path_name
 
     type = models.ForeignKey(MasterFileType, on_delete=models.CASCADE, related_name='master_files')
@@ -66,3 +67,29 @@ class MasterFile(models.Model):
         db_table = 'master_files'
         unique_together = (('company', 'area'),)
         ordering = ('-created_at',)
+
+
+class Transaction(models.Model):
+    file = models.ForeignKey(File, on_delete=models.DO_NOTHING, related_name='transactions')
+    account_level = models.CharField(max_length=20, null=True)  # nivel_cuenta
+    is_transactional = models.BooleanField()  # transaccional
+    account_number = models.CharField(max_length=20)
+    account_name = models.CharField(max_length=100)
+    third_code = models.CharField(max_length=20, null=True)  # codigo_tercero
+    branch = models.CharField(max_length=20, null=True)  # sucursal_tercero
+    third_name = models.CharField(max_length=100, null=True)  # nombre_tercero
+    initial_balance = models.DecimalField(max_digits=15, decimal_places=2)  # saldo_inicial
+    debit = models.DecimalField(max_digits=15, decimal_places=2)  # movimiento_debito
+    credit = models.DecimalField(max_digits=15, decimal_places=2)  # movimiento_credito
+    final_balance = models.DecimalField(max_digits=15, decimal_places=2)
+    is_active = models.BooleanField(default=True)  # activo
+    is_reprocessing = models.BooleanField(default=True)  # reproceso
+    version = models.PositiveSmallIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'transactions'
+
+    def __str__(self):
+        return self.account_name
