@@ -1,8 +1,10 @@
 from rest_framework import serializers
-from .models import TransactionFile, MasterFile, MasterFileType
+from .models import TransactionFile, MasterFile, MasterFileType, TransactionColumnNameOption
 
 
 class FileSerializer(serializers.ModelSerializer):
+    last_version = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = TransactionFile
         fields = '__all__'
@@ -31,3 +33,9 @@ class MasterFileSerializer(serializers.ModelSerializer):
         type = MasterFileType.objects.get(id=data.get('type'))
         internal_value.update({'type': type})
         return internal_value
+
+
+class TransactionColumnNameOptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TransactionColumnNameOption
+        fields = '__all__'

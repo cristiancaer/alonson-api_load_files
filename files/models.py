@@ -32,6 +32,10 @@ class TransactionFile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def save(self, *args, **kwargs) -> None:
+        self.last_version += 1
+        return super().save(*args, **kwargs)
+
     class Meta:
         db_table = 'transaction_files'
         unique_together = (('company', 'area', 'year', 'month'),)
@@ -74,6 +78,7 @@ class MasterFile(models.Model):
 
 
 class Transaction(models.Model):
+    index_in_file = models.PositiveIntegerField()
     file = models.ForeignKey(TransactionFile, on_delete=models.DO_NOTHING, related_name='transactions')
     account_level = models.CharField(max_length=20, null=True)  # nivel_cuenta
     is_transactional = models.BooleanField()  # transaccional
@@ -82,18 +87,28 @@ class Transaction(models.Model):
     third_code = models.CharField(max_length=20, null=True)  # codigo_tercero
     branch = models.CharField(max_length=20, null=True)  # sucursal_tercero
     third_name = models.CharField(max_length=100, null=True)  # nombre_tercero
-    initial_balance = models.DecimalField(max_digits=15, decimal_places=2)  # saldo_inicial
-    debit = models.DecimalField(max_digits=15, decimal_places=2)  # movimiento_debito
-    credit = models.DecimalField(max_digits=15, decimal_places=2)  # movimiento_credito
-    final_balance = models.DecimalField(max_digits=15, decimal_places=2)
+    initial_balance = models.FloatField()  # saldo_inicial
+    debit = models.FloatField()  # movimiento_debito
+    credit = models.FloatField()  # movimiento_credito
+    final_balance = models.FloatField()
     is_active = models.BooleanField(default=True)  # activo
-    is_reprocessing = models.BooleanField(default=True)  # reproceso
+    # is_reprocessing = models.BooleanField(default=True)  # reproceso
     version = models.PositiveSmallIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'transactions'
+        ordering = ('file', 'index_in_file',)
 
     def __str__(self):
         return self.account_name
+
+
+class TransactionColumnNameOption(models.Model):
+    key_name = models.CharField(max_length=25, unique=True)
+    values = models.JSONField()
+    is_required = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'transaction_column_name_options'

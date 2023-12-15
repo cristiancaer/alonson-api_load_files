@@ -1,6 +1,7 @@
 import re
 from django.core.exceptions import BadRequest
 from django.core.validators import MaxValueValidator, MinValueValidator
+import unicodedata
 
 
 def setRangeValidators(min_value, max_value):
@@ -19,3 +20,22 @@ def validate_password(password, min_characters=8, raise_error=False):
     if raise_error:
         raise BadRequest(message)
     return message
+
+
+def replace_accents(input_str):
+    nfkd_form = unicodedata.normalize('NFKD', input_str)
+    only_ascii = nfkd_form.encode('ASCII', 'ignore')
+    return only_ascii.decode()
+
+
+def format_as_key_name(input_str):
+    return replace_accents(input_str).lower().strip().strip(' ')
+
+
+def str_to_bool(value):
+    if not value:
+        return False
+    value = format_as_key_name(value)
+    if value in ('yes', 'true', 't', 'y', '1', 'si', 's'):
+        return True
+    return False

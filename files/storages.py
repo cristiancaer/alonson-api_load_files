@@ -36,7 +36,8 @@ class AzureStorage(Storage):
 
     def _open(self, name, mode='rb'):
         blob_client = self.service_client.get_blob_client(container=self.CONTAINER_NAME, blob=name)
-        return open(blob_client, mode)
+        handler = blob_client.download_blob()
+        return handler
 
     def _save(self, name: str, memory_file_object):
         blob_client = self.service_client.get_blob_client(container=self.CONTAINER_NAME, blob=name)

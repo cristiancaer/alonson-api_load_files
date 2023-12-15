@@ -1,5 +1,5 @@
-from .models import TransactionFile, MasterFileType, MasterFile
-from .serializers import FileSerializer, MasterFileTypeSerializer, MasterFileSerializer
+from .models import TransactionFile, MasterFileType, MasterFile, TransactionColumnNameOption
+from .serializers import FileSerializer, MasterFileTypeSerializer, MasterFileSerializer, TransactionColumnNameOptionSerializer
 from utils.views import RollAccessApiView, BasicCrudApiView
 from rest_framework.response import Response
 from rest_framework import status
@@ -7,6 +7,8 @@ from utils.request_data import get_field_from_request
 from utils.exceptions import format_serializer_errors
 from django.core.exceptions import BadRequest
 from users.permissions import IsSuperAdminOrReadOnly
+from django.db import transaction
+from .transactions import TransactionsHandler
 
 
 class FilesApiView(RollAccessApiView):
@@ -23,13 +25,21 @@ class FilesApiView(RollAccessApiView):
             area = get_field_from_request(data, 'area')
             year = get_field_from_request(data, 'year')
             month = get_field_from_request(data, 'month')
+            file = get_field_from_request(data, 'file')
             stored_file = query.filter(company=company, area=area, year=year, month=month).first()
             if not stored_file:
                 serializer = self.serializer(data=data)
             else:
                 serializer = self.serializer(instance=stored_file, data=data, partial=True)
             if serializer.is_valid():
-                serializer.save()
+                with transaction.atomic():
+                    transaction_file = serializer.save()
+                    transactions = TransactionsHandler(transaction_file, file)
+                    print(transactions.df.head(20))
+                    print(transactions.df.tail(20))
+                    transactions.save_in_db()
+                    print(transactions.df.head())
+                    print('done')
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response(format_serializer_errors(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
         except BadRequest as e:
@@ -42,6 +52,13 @@ class MaterTypesApiView(BasicCrudApiView):
     model = MasterFileType
     serializer = MasterFileTypeSerializer
     id_field_name = 'type_id'
+    permission_classes = (IsSuperAdminOrReadOnly,)
+
+
+class TransactionColumnNameOptionsApiView(RollAccessApiView):
+    model = TransactionColumnNameOption
+    serializer = TransactionColumnNameOptionSerializer
+    id_field_name = 'column_name_id'
     permission_classes = (IsSuperAdminOrReadOnly,)
 
 
