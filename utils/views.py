@@ -172,6 +172,6 @@ class RollAccessApiView(APIView):
             if not instance:
                 return Response(NO_RECORDS, status=status.HTTP_204_NO_CONTENT)
             instance.delete()
-            return Response(TASK_DONE, status=status.HTTP_204_NO_CONTENT)
+            return Response(TASK_DONE, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
