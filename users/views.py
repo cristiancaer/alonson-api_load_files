@@ -5,10 +5,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from .permissions import IsAdminUser
 
 
 class UsersApiView(RollAccessApiView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminUser,)
     model = User
     serializer = UserSerializer
     id_field_name = 'user_id'
