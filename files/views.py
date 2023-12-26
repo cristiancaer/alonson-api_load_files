@@ -25,8 +25,9 @@ class FilesApiView(RollAccessApiView):
             area = get_field_from_request(data, 'area')
             year = get_field_from_request(data, 'year')
             month = get_field_from_request(data, 'month')
+            is_adjustment = get_field_from_request(data, 'is_adjustment')
             file = get_field_from_request(data, 'file')
-            stored_file = query.filter(company=company, area=area, year=year, month=month).first()
+            stored_file = query.filter(company=company, area=area, year=year, month=month, is_adjustment=is_adjustment).first()
             if not stored_file:
                 serializer = self.serializer(data=data)
             else:

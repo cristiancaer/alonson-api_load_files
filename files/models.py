@@ -18,7 +18,11 @@ class TransactionFile(models.Model):
         allowed_extensions = PLAIN_EXTENSIONS + EXCEL_EXTENSIONS
         if file_extension not in allowed_extensions:
             raise Exception(f"Extension {file_extension} not allowed. Allowed extensions are {allowed_extensions}")
-        path_name = f"{get_base_area_path(instance)}/movimientos/{instance.year}_{instance.month:02}.{file_extension}"
+        path = f"{get_base_area_path(instance)}/movimientos/"
+        name = f"{instance.year}_{instance.month:02}"
+        if instance.is_adjustment:
+            name = f'ajuste_{name}'
+        path_name = f"{path}{name}.{file_extension}"
         return path_name
 
     uploaded_filename = models.CharField(max_length=255)
@@ -28,17 +32,34 @@ class TransactionFile(models.Model):
     loaded_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_files')
     year = models.IntegerField(validators=setRangeValidators(1900, 2100))
     month = models.IntegerField(validators=setRangeValidators(1, 12))
-    last_version = models.SmallIntegerField(default=0)
+    last_version = models.FloatField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_adjustment = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs) -> None:
-        self.last_version += 1
+        self.update_version()
         return super().save(*args, **kwargs)
+
+    def update_version(self):
+        if not self.is_adjustment:
+            self.last_version += 1
+            return
+        # is adjustment file
+        step = 0.01
+        not_adjustment_file = TransactionFile.objects.filter(company=self.company, area=self.area, year=self.year, month=self.month, is_adjustment=False).first()
+        if not_adjustment_file is None:
+            raise Exception('must load a non-adjustment file before loading an adjustment file')
+        if self.last_version > not_adjustment_file.last_version:
+            # this happens when the adjustment file is uploaded after an adjustment file
+            self.last_version = self.last_version + step
+        else:
+            # this happens when the adjustment file is uploaded after a non-adjustment file
+            self.last_version = not_adjustment_file.last_version + step
 
     class Meta:
         db_table = 'transaction_files'
-        unique_together = (('company', 'area', 'year', 'month'),)
+        unique_together = (('company', 'area', 'year', 'month', 'is_adjustment'),)
         ordering = ('-year', '-month')
 
 
@@ -92,8 +113,9 @@ class Transaction(models.Model):
     credit = models.FloatField()  # movimiento_credito
     final_balance = models.FloatField()
     is_active = models.BooleanField(default=True)  # activo
+    is_adjustment = models.BooleanField(default=False)
     # is_reprocessing = models.BooleanField(default=True)  # reproceso
-    version = models.PositiveSmallIntegerField(default=0)
+    version = models.FloatField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

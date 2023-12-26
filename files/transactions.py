@@ -85,7 +85,7 @@ class TransactionsHandler:
                 raise Exception(f"Missing value in column {self.found_columns.get(column)}. index: {index + self.DF_OPTIONS.get('skiprows') + 1}")
             return value
         row = {key: check_value(value, key, index) for key, value in row.items()}
-        return Transaction(**row, index_in_file=index, version=self.transaction_file.last_version, file=self.transaction_file)
+        return Transaction(**row, index_in_file=index, version=self.transaction_file.last_version, is_adjustment=self.transaction_file.is_adjustment, file=self.transaction_file)
 
     def save_in_db(self):
         self.transaction_file.transactions.all().update(is_active=False)
