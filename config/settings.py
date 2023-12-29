@@ -33,7 +33,8 @@ ALLOWED_HOSTS = [ '*' ]
 LOCAL_APPS = [
     'users',
     'companies',
-    'files'
+    'files',
+    'usage_log',
 ]
 
 THIRD_PARTY_APPS = [
@@ -58,6 +59,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'usage_log.middleware.UsageLogMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
