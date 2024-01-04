@@ -9,6 +9,8 @@ from django.core.exceptions import BadRequest
 from users.permissions import IsSuperAdminOrReadOnly
 from django.db import transaction
 from .transactions import TransactionsHandler
+from utils.request_data import get_field_from_url_args
+from utils.exceptions import NO_RECORDS
 
 
 class FilesApiView(RollAccessApiView):
@@ -16,6 +18,31 @@ class FilesApiView(RollAccessApiView):
     serializer = FileSerializer
     id_field_name = 'file_id'
     user_field_name = 'loaded_by'
+
+    def get(self, request, **kwargs):
+        try:
+            data = self.get_queryset(request)
+            id = get_field_from_url_args(kwargs, self.id_field_name, False)
+            year = get_field_from_url_args(request.GET, 'year', False)
+            month = get_field_from_url_args(request.GET, 'month', False)
+            company = get_field_from_url_args(request.GET, 'company', False)
+            area = get_field_from_url_args(request.GET, 'area', False)
+            if year:
+                data = data.filter(year=year)
+            if month:
+                data = data.filter(month=month)
+            if company:
+                data = data.filter(company__id=company)
+            if area:
+                data = data.filter(area__id=area)
+            if id:
+                data = data.filter(id=id).first()
+            if not data:
+                return Response(NO_RECORDS, status=status.HTTP_204_NO_CONTENT)
+            serializer = self.serializer(data, many=not bool(id))
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def put(self, request, **kwargs):
         try:
