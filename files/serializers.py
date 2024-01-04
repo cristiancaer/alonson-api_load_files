@@ -3,7 +3,7 @@ from .models import TransactionFile, MasterFile, MasterFileType, TransactionColu
 
 
 class FileSerializer(serializers.ModelSerializer):
-    last_version = serializers.IntegerField(read_only=True)
+    last_version = serializers.ReadOnlyField()
 
     class Meta:
         model = TransactionFile
