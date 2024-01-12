@@ -11,6 +11,7 @@ from django.db import transaction
 from .transactions import TransactionsHandler
 from utils.request_data import get_field_from_url_args
 from utils.exceptions import NO_RECORDS
+from utils.fields import str_to_bool
 
 
 class FilesApiView(RollAccessApiView):
@@ -52,7 +53,7 @@ class FilesApiView(RollAccessApiView):
             area = get_field_from_request(data, 'area')
             year = get_field_from_request(data, 'year')
             month = get_field_from_request(data, 'month')
-            is_adjustment = get_field_from_request(data, 'is_adjustment')
+            is_adjustment = str_to_bool(get_field_from_request(data, 'is_adjustment'))
             file = get_field_from_request(data, 'file')
             stored_file = query.filter(company=company, area=area, year=year, month=month, is_adjustment=is_adjustment).first()
             if not stored_file:
