@@ -14,3 +14,4 @@ class UsageLog(models.Model):
 
     class Meta:
         db_table = 'usage_logs'
+        ordering = ('-created_at',)
