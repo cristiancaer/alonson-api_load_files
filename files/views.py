@@ -97,6 +97,35 @@ class MasterFilesApiView(RollAccessApiView):
     id_field_name = 'master_id'
     user_field_name = 'loaded_by'
 
+    def get(self, request, **kwargs):
+        try:
+            data = self.get_queryset(request)
+            id = get_field_from_url_args(kwargs, self.id_field_name, False)
+            year = get_field_from_url_args(request.GET, 'year', False)
+            month = get_field_from_url_args(request.GET, 'month', False)
+            company = get_field_from_url_args(request.GET, 'company', False)
+            area = get_field_from_url_args(request.GET, 'area', False)
+            master_type = get_field_from_url_args(request.GET, 'master_type', False)
+            if year:
+                data = data.filter(year=year)
+            if month:
+                data = data.filter(month=month)
+            if company:
+                data = data.filter(company__id=company)
+            if area:
+                data = data.filter(area__id=area)
+            if id:
+                data = data.filter(id=id).first()
+            if master_type:
+                master_type = MasterFileType.objects.get(name=master_type)  # check if  type exist
+                data = data.filter(type__id=master_type.id)
+            if not data:
+                return Response(NO_RECORDS, status=status.HTTP_204_NO_CONTENT)
+            serializer = self.serializer(data, many=not bool(id))
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     def put(self, request, **kwargs):
         try:
             data = self.get_validated_data(request)
