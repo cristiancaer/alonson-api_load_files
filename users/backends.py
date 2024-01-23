@@ -9,8 +9,8 @@ class UserBackend(ModelBackend):
         password = kwargs['password']
         try:
             user = User.objects.get(email=email)
-            valid = user.check_password(password)
-            if valid:
+            valid_password = user.check_password(password)
+            if valid_password and user.is_active and user.company.is_active:
                 return user
         except User.DoesNotExist:
             pass
