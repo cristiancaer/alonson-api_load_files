@@ -35,6 +35,7 @@ LOCAL_APPS = [
     'companies',
     'files',
     'usage_log',
+    'users.reset_password',
 ]
 
 THIRD_PARTY_APPS = [
@@ -205,3 +206,19 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STORAGE_ACCOUNT_NAME = env('STORAGE_ACCOUNT_NAME')
 CONECTION_STRING = env('CONECTION_STRING')
 CONTAINER_NAME = env('CONTAINER_NAME')
+
+EMAIL_HOST = env('EMAIL_HOST')
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = env('EMAIL_PORT')
+EMAIL_USE_TLS = env('EMAIL_USE_TLS')
+SITE_NAME = env('SITE_NAME')
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+EMAIL_FILE_PATH = BASE_DIR / "sent_emails"
+
+PASSWORD_LIFETIME = int(env('PASSWORD_LIFETIME')) # in seconds
+MAX_PASSWORD_ATTEMPTS = int(env('MAX_PASSWORD_ATTEMPTS'))
+PASSWORD_DIGITS_NUMBER = int(env('PASSWORD_DIGITS_NUMBER'))
+
+RESET_PASSWORD_URL = env('RESET_PASSWORD_URL')
