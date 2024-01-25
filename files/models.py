@@ -85,7 +85,7 @@ class MasterFile(models.Model):
 
     type = models.ForeignKey(MasterFileType, on_delete=models.CASCADE, related_name='master_files')
     uploaded_filename = models.CharField(max_length=255)
-    file = models.FileField( upload_to=get_company_directory_path)
+    file = models.FileField(upload_to=get_company_directory_path)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='company_master_files')
     area = models.ForeignKey(Area, on_delete=models.CASCADE, related_name= 'area_master_files')
     loaded_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_master_files')
@@ -94,7 +94,7 @@ class MasterFile(models.Model):
 
     class Meta:
         db_table = 'master_files'
-        unique_together = (('company', 'area'),)
+        unique_together = (('company', 'area', 'type'),)
         ordering = ('-created_at',)
 
 

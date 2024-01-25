@@ -101,15 +101,9 @@ class MasterFilesApiView(RollAccessApiView):
         try:
             data = self.get_queryset(request)
             id = get_field_from_url_args(kwargs, self.id_field_name, False)
-            year = get_field_from_url_args(request.GET, 'year', False)
-            month = get_field_from_url_args(request.GET, 'month', False)
             company = get_field_from_url_args(request.GET, 'company', False)
             area = get_field_from_url_args(request.GET, 'area', False)
             master_type = get_field_from_url_args(request.GET, 'master_type', False)
-            if year:
-                data = data.filter(year=year)
-            if month:
-                data = data.filter(month=month)
             if company:
                 data = data.filter(company__id=company)
             if area:
