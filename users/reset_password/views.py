@@ -10,7 +10,6 @@ from users.models import User
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives, get_connection
 from django.template.loader import render_to_string
-from utils.fields import check_password
 import time
 from threading import Thread
 from django.utils.crypto import get_random_string
@@ -140,12 +139,6 @@ class ChangePasswordApiView(APIView):
                 return check_code
 
             password = get_field_from_request(request.data, 'password')
-            confirm_password = get_field_from_request(request.data, 'confirm_password')
-            if password != confirm_password:
-                raise BadRequest({'detail': 'password and confirm password must be equal'})
-            if not check_password(password, 8):
-                raise BadRequest({'detail': 'the password must have a length of 8 characters and at least one letter, one number and one special character'})
-
             self.set_password(email, password, code)
             self.sent_mail(email)
             return Response(TASK_DONE, status=status.HTTP_200_OK)
@@ -156,7 +149,7 @@ class ChangePasswordApiView(APIView):
 
     def set_password(self, email, password, code):
         user = User.objects.filter(email=email).first()
-        user.set_password(password)
+        user.password = password
         user.save()
         reset_data = ResetPasswordData.objects.filter(code=code, user__email=email).first()
         reset_data.code = None
