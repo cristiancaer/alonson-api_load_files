@@ -44,7 +44,7 @@ class RequestResetPasswordApiView(APIView):
     @classmethod
     def generate_random_code(clc):
         while True:
-            code = get_random_string(length=32)
+            code = get_random_string(length=64)
             if not ResetPasswordData.objects.filter(code=code).exists():
                 break
         return code
@@ -96,34 +96,51 @@ class CheckPasswordCodeApiView(APIView):
     def post(self, request):
         try:
             code = get_field_from_request(request.data, 'code')
-            email = get_field_from_request(request.data, 'email')
-            return self.check(code, email)
+            return self.check(code)
         except BadRequest as e:
             return Response(e.args[0], status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @classmethod
-    def check(clc, code, email):
+    def check(clc, code):
         if not code:
             return Response({'detail': ' invalid code', 'type': 'task'}, status=status.HTTP_400_BAD_REQUEST)
-        if not clc.allow_attempt(email):
+        if not clc.allow_attempt(code):
             return Response({'detail': 'you have exceeded the maximum number of attempts. you must wait one hour to try again', 'type': 'task'}, status=status.HTTP_400_BAD_REQUEST)
-        reset_data = ResetPasswordData.objects.filter(code=code, user__email=email).first()
+        reset_data = ResetPasswordData.objects.filter(code=code).first()
         if not reset_data:
             return Response(NO_RECORDS, status=status.HTTP_400_BAD_REQUEST)
         return Response({'detail': 'valid code', 'type': 'task'}, status=status.HTTP_200_OK)
 
+    @staticmethod
+    def get_user(code):
+        password_data = ResetPasswordData.objects.filter(code=code).first()
+        if not password_data:
+            return None
+        return password_data.user
+
     @classmethod
-    def allow_attempt(self, email):
-        attempts = ChangePasswordAttempts.objects.filter(user__email=email).first()
+    def get_attempts(clc, code):
+        user = clc.get_user(code)
+        if not user:
+            return None, None
+        attempts = ChangePasswordAttempts.objects.filter(user__email=user.email).first()
         if not attempts:
-            user = User.objects.filter(email=email).first()
+            user = User.objects.filter(email=user.email).first()
+            attempts = ChangePasswordAttempts(user=user)
+            attempts.save()
+        return attempts, user
+
+    @classmethod
+    def allow_attempt(self, code):
+        attempts, user = self.get_attempts(code)
+        if not attempts:
             attempts = ChangePasswordAttempts(user=user)
             attempts.save()
         allow = attempts.allow_increase_counter()
         if not allow:
-            RequestResetPasswordApiView.reset_code(email)
+            RequestResetPasswordApiView.reset_code(user.email)
         return allow
 
 
@@ -133,25 +150,24 @@ class ChangePasswordApiView(APIView):
     def post(self, request):
         try:
             code = get_field_from_request(request.data, 'code')
-            email = get_field_from_request(request.data, 'email')
-            check_code = CheckPasswordCodeApiView.check(code, email)
+            check_code = CheckPasswordCodeApiView.check(code)
             if check_code.status_code == status.HTTP_400_BAD_REQUEST:
                 return check_code
 
             password = get_field_from_request(request.data, 'password')
-            self.set_password(email, password, code)
-            self.sent_mail(email)
+            user = CheckPasswordCodeApiView.get_user(code)
+            self.set_password(user, password, code)
+            self.sent_mail(user.email)
             return Response(TASK_DONE, status=status.HTTP_200_OK)
         except BadRequest as e:
             return Response(e.args[0], status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    def set_password(self, email, password, code):
-        user = User.objects.filter(email=email).first()
+    def set_password(self, user, password, code):
         user.password = password
         user.save()
-        reset_data = ResetPasswordData.objects.filter(code=code, user__email=email).first()
+        reset_data = ResetPasswordData.objects.filter(user__id=user.id, code=code).first()
         reset_data.code = None
         reset_data.has_been_used = True
         reset_data.save()
