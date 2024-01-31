@@ -122,7 +122,10 @@ class RollAccessApiView(APIView):
             return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def get_validated_data(self, request):
-        data = request.data.dict()
+        if isinstance(request.data, dict):
+            data = request.data
+        else:
+            data = request.data.dict()
         if request.user.is_super_admin:
             return data
         if self.user_field_name:
