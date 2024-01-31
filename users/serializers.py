@@ -21,3 +21,9 @@ class UserSerializer(serializers.ModelSerializer):
         if area:
             internal_value['area'] = Area.objects.get(id=area)
         return internal_value
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+        if password:
+            instance.set_password(password)
+        return super().update(instance, validated_data)

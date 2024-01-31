@@ -40,8 +40,6 @@ class User(models.Model):
     def save(self, *args, **kwargs):
         if self.is_super_admin:
             self.is_admin = True
-        if self.password:
-            self.set_password(self.password)
         super().save(*args, **kwargs)
 
     @property
