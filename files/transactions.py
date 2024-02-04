@@ -51,7 +51,7 @@ class TransactionsHandler:
         missing_columns = required_columns - df_columns
         message = ''
         for column in missing_columns:
-            message += f"Missing column: {column}. options: {self.COLUMN_NAMES_OPTIONS.get(column)}\n"
+            message += f" Columna {column} es necesaria. options: {self.COLUMN_NAMES_OPTIONS.get(column)}\n"
         if message:
             raise Exception(message)
 
@@ -82,7 +82,7 @@ class TransactionsHandler:
     def row_to_transaction(self, row, index):
         def check_value(value, column, index):
             if value is None and self.COLUMN_NAMES_OPTIONS.get(column).is_required:
-                raise Exception(f"Missing value in column {self.found_columns.get(column)}. index: {index + self.DF_OPTIONS.get('skiprows') + 1}")
+                raise Exception(f"Celda requerida, vacía: fila {index + self.DF_OPTIONS.get('skiprows') + 2}, columna {self.found_columns.get(column)}")
             return value
         row = {key: check_value(value, key, index) for key, value in row.items()}
         return Transaction(**row, index_in_file=index, version=self.transaction_file.last_version, is_adjustment=self.transaction_file.is_adjustment, file=self.transaction_file)
