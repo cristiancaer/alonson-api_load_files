@@ -7,6 +7,7 @@ from utils.request_data import get_field_from_url_args
 from django.core.exceptions import BadRequest
 from utils.exceptions import NO_RECORDS, TASK_DONE, format_serializer_errors
 from rest_framework.permissions import IsAuthenticated
+from django.http import QueryDict
 
 
 class BasicCrudApiView(APIView):
@@ -42,10 +43,10 @@ class BasicCrudApiView(APIView):
         try:
             data = request.data
             if self.use_user:
-                if isinstance(data, dict):
-                    data = {**data, self.user_field_name: request.user.id}
-                else:
+                if isinstance(data, QueryDict):
                     data = {**data.dict(), self.user_field_name: request.user.id}
+                else:
+                    data = {**data, self.user_field_name: request.user.id}
             serializer = self.serializer(data=data)
             if serializer.is_valid():
                 serializer.save()
@@ -60,10 +61,10 @@ class BasicCrudApiView(APIView):
         try:
             data = request.data
             if self.use_user:
-                if isinstance(data, dict):
-                    data = {**data, self.user_field_name: request.user.id}
-                else:
+                if isinstance(data, QueryDict):
                     data = {**data.dict(), self.user_field_name: request.user.id}
+                else:
+                    data = {**data, self.user_field_name: request.user.id}
             id = get_field_from_url_args(kwargs, self.id_field_name)
             instance = self.model.objects.filter(id=id).first()
             if not instance:
@@ -122,10 +123,10 @@ class RollAccessApiView(APIView):
             return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def get_validated_data(self, request):
-        if isinstance(request.data, dict):
-            data = request.data
-        else:
+        if isinstance(request.data, QueryDict):
             data = request.data.dict()
+        else:
+            data = request.data
         if request.user.is_super_admin:
             return data
         if self.user_field_name:
