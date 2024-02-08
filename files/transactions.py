@@ -6,6 +6,7 @@ import numpy as np
 from django.core.files.uploadhandler import FileUploadHandler
 from utils.fields import format_as_key_name, str_to_bool
 from typing import Dict, List
+from django.core.exceptions import BadRequest
 
 
 @dataclass
@@ -53,7 +54,7 @@ class TransactionsHandler:
         for column in missing_columns:
             message += f" Columna {column} es necesaria. options: {self.COLUMN_NAMES_OPTIONS.get(column)}\n"
         if message:
-            raise Exception(message)
+            raise BadRequest(message)
 
     def __post_init__(self):
         self.COLUMN_NAMES_OPTIONS = self.get_column_names_options()
@@ -71,7 +72,7 @@ class TransactionsHandler:
     def get_df(self):
         extension = get_file_extension(self.transaction_file.file.name)
         if extension not in PLAIN_EXTENSIONS + EXCEL_EXTENSIONS:
-            raise Exception('invalid file')
+            raise BadRequest('invalid file')
         if extension in PLAIN_EXTENSIONS:
             df = pd.read_csv(self.file_handler, **self.DF_OPTIONS)
         else:
@@ -82,7 +83,7 @@ class TransactionsHandler:
     def row_to_transaction(self, row, index):
         def check_value(value, column, index):
             if value is None and self.COLUMN_NAMES_OPTIONS.get(column).is_required:
-                raise Exception(f"Celda requerida, vacía: fila {index + self.DF_OPTIONS.get('skiprows') + 2}, columna {self.found_columns.get(column)}")
+                raise BadRequest(f"Celda requerida, vacía: fila {index + self.DF_OPTIONS.get('skiprows') + 2}, columna {self.found_columns.get(column)}")
             return value
         row = {key: check_value(value, key, index) for key, value in row.items()}
         return Transaction(**row, index_in_file=index, version=self.transaction_file.last_version, is_adjustment=self.transaction_file.is_adjustment, file=self.transaction_file)
