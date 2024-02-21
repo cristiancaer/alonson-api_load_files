@@ -65,10 +65,7 @@ class FilesApiView(RollAccessApiView):
                 with transaction.atomic():
                     transaction_file = serializer.save()
                     transactions = TransactionsHandler(transaction_file, file)
-                    print(transactions.df.head(20))
-                    print(transactions.df.tail(20))
                     transactions.save_in_db()
-                    print(transactions.df.head())
                 send_mail(to=[request.user.email], subject='Movimientos cardado exitosamente', email_plaintext_message=f'Movimientos cargados exitosamente: {transaction_file.year}-{transaction_file.month}', email_html_message='<h1>Movimientos cargados exitosamente</h1>')
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response(format_serializer_errors(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
