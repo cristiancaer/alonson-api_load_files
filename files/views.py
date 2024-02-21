@@ -12,6 +12,7 @@ from .transactions import TransactionsHandler
 from utils.request_data import get_field_from_url_args
 from utils.exceptions import NO_RECORDS
 from utils.fields import str_to_bool
+from utils.email import send_mail
 
 
 class FilesApiView(RollAccessApiView):
@@ -68,7 +69,7 @@ class FilesApiView(RollAccessApiView):
                     print(transactions.df.tail(20))
                     transactions.save_in_db()
                     print(transactions.df.head())
-                    print('done')
+                send_mail(to=[request.user.email], subject='Movimientos cardado exitosamente', email_plaintext_message=f'Movimientos cargados exitosamente: {transaction_file.year}-{transaction_file.month}', email_html_message='<h1>Movimientos cargados exitosamente</h1>')
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response(format_serializer_errors(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
         except BadRequest as e:
