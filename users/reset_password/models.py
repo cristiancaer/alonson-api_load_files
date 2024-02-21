@@ -23,13 +23,12 @@ class ChangePasswordAttempts(models.Model):
     count = models.IntegerField(default=0)
 
     def allow_increase_counter(self):
-        if self.count < settings.MAX_PASSWORD_ATTEMPTS:
-            self.count += 1
-            self.save()
-            return True
         now = datetime.now()
         exp = self.updated_at + timedelta(hours=1)
         if now > exp:
             self.count = 0
-            self.allow_increase_counter()
+        if self.count < settings.MAX_PASSWORD_ATTEMPTS:
+            self.count += 1
+            self.save()
+            return True
         return False

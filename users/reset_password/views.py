@@ -53,6 +53,7 @@ class RequestResetPasswordApiView(APIView):
         """delete the password_code after PASSWORD_LIFETIME min"""
         def soft_delete():
             time.sleep(settings.PASSWORD_LIFETIME)
+            reset_password_data.refresh_from_db()
             reset_password_data.code = None
             reset_password_data.save()
 
@@ -165,7 +166,7 @@ class ChangePasswordApiView(APIView):
             return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def set_password(self, user, password, code):
-        user.password = password
+        user.set_password(password)
         user.save()
         reset_data = ResetPasswordData.objects.filter(user__id=user.id, code=code).first()
         reset_data.code = None
