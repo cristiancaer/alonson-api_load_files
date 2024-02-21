@@ -3,7 +3,7 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives, get_connection
 
 
-def send_mail(self, to: List[str], subject, email_plaintext_message=None, email_html_message=None):
+def send_mail(to: List[str], subject, email_plaintext_message=None, email_html_message=None):
     # render email text
     with get_connection(host=settings.EMAIL_HOST,
                         port=settings.EMAIL_PORT,
